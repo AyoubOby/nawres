@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Birthday Gift & Souvenir Book</title>
+    <style>
+      :root {
+        --bg: #0f1226;
+        --accent: #ff4d6d;
+        --ribbon: #ffd166;
+        --box: #6c63ff;
+        --lid: #5a53e6;
+        --paper: #fff7f0;
+        --ink: #222;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(
+            1200px 800px at 50% 20%,
+            #1a1e3a 0%,
+            #0b0d1f 55%,
+            #05060f 100%
+          ),
+          var(--bg);
+        color: #fff;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+          "Helvetica Neue", Arial;
+      }
+      .stage {
+        position: relative;
+        display: grid;
+        place-items: center;
+        gap: 22px;
+        padding: 28px;
+        text-align: center;
+      }
+
+      /* Gift box */
+      .gift {
+        position: relative;
+        width: 220px;
+        height: 220px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .box {
+        position: absolute;
+        inset: auto 0 0 0;
+        margin: auto;
+        width: 100%;
+        height: 68%;
+        background: linear-gradient(180deg, var(--box), #4e47c8);
+        border-radius: 16px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35) inset,
+          0 10px 30px rgba(0, 0, 0, 0.35);
+        overflow: hidden;
+      }
+      .box::before,
+      .box::after {
+        content: "";
+        position: absolute;
+        background: var(--ribbon);
+      }
+      .box::before {
+        width: 28px;
+        height: 100%;
+        left: calc(50% - 14px);
+        top: 0;
+      }
+      .box::after {
+        height: 28px;
+        width: 100%;
+        top: 40%;
+        left: 0;
+      }
+
+      .lid {
+        position: absolute;
+        width: 110%;
+        height: 40%;
+        left: -5%;
+        top: -2%;
+        background: linear-gradient(180deg, var(--lid), #4a44c0);
+        border-radius: 18px;
+        transform-origin: 0% 100%;
+        transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        box-shadow: 0 18px 24px rgba(0, 0, 0, 0.4);
+      }
+      .gift.open .lid {
+        transform: translate(-10px, -130px) rotate(-24deg);
+      }
+      .gift.open ~ .message {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .gift.open .confetti {
+        opacity: 1;
+      }
+
+      /* Happy Birthday message */
+      .message {
+        font-size: clamp(28px, 5vw, 44px);
+        font-weight: 800;
+        background: linear-gradient(
+          90deg,
+          #ffd166,
+          #ff4d6d,
+          #6c63ff,
+          #64dfdf,
+          #ffd166
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-shadow: 0 2px 10px rgba(255, 255, 255, 0.15);
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.6s ease 0.25s;
+      }
+
+      /* Button */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.75rem 1rem;
+        border-radius: 999px;
+        background: linear-gradient(180deg, #ffffff, #ece8ff);
+        color: #343a40;
+        font-weight: 700;
+        border: 0;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25),
+          0 1px 0 rgba(255, 255, 255, 0.8) inset;
+        transform: translateY(2px);
+        transition: transform 0.15s ease;
+      }
+      .btn:hover {
+        transform: translateY(0);
+      }
+      .btn:active {
+        transform: translateY(2px) scale(0.98);
+      }
+
+      /* Confetti */
+      .confetti {
+        position: absolute;
+        inset: -20vh -10vw -10vh -10vw;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease 0.2s;
+      }
+      .piece {
+        position: absolute;
+        width: 10px;
+        height: 18px;
+        border-radius: 3px;
+        opacity: 0.9;
+        animation: float linear forwards;
+      }
+      @keyframes float {
+        to {
+          transform: translateY(110vh) rotate(720deg);
+          opacity: 0.95;
+        }
+      }
+
+      /* Modal */
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(5, 6, 15, 0.6);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+      .modal.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .bookWrap {
+        width: min(92vw, 820px);
+      }
+      .book {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+      }
+
+      .page {
+        background: var(--paper);
+        color: var(--ink);
+        padding: 26px 24px;
+        border-radius: 12px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        margin: 8px;
+      }
+      .page h3 {
+        margin: 0 0 0.35rem;
+      }
+      .page p {
+        margin: 0.35rem 0;
+        line-height: 1.45;
+      }
+
+      .polaroid {
+        background: #fff;
+        border-radius: 8px;
+        padding: 8px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+        margin: 10px 0;
+        text-align: center;
+      }
+      .polaroid img {
+        max-width: 100%;
+        border-radius: 4px;
+        display: block;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 14px;
+        gap: 12px;
+      }
+      .ctrl {
+        border: 2px solid #fff;
+        background: transparent;
+        color: #fff;
+        padding: 0.6rem 0.9rem;
+        border-radius: 999px;
+        cursor: pointer;
+      }
+      .ctrl:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .closeX {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        border: 0;
+        background: transparent;
+        color: #fff;
+        font-size: 28px;
+        cursor: pointer;
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="gift" id="gift">
+        <div class="lid"></div>
+        <div class="box"></div>
+        <div class="confetti" id="confetti"></div>
+      </div>
+      <div class="message" id="msg">🎉 Happy Birthday! 🎂</div>
+      <button class="btn" id="openBookBtn" style="display: none">
+        📖 Open Souvenir Book
+      </button>
+    </div>
+
+    <!-- Souvenir Book Modal -->
+    <div class="modal" id="souvenirModal">
+      <button class="closeX" id="closeModal">✕</button>
+      <div class="bookWrap">
+        <div class="book">
+          <!-- Left -->
+          <div class="page">
+            <h3>Souvenir Book</h3>
+            <div class="polaroid"><img src="photo3.jpg" alt="Cover" /></div>
+            <p>A little collection of memories to make you smile.</p>
+          </div>
+          <!-- Right -->
+          <div class="page">
+            <h3>Today</h3>
+            <p>May your day be full of surprises, cake, and good vibes!</p>
+            <div class="polaroid"><img src="photo4.jpg" alt="Birthday" /></div>
+          </div>
+        </div>
+
+        <div class="book">
+          <!-- Memory 1 -->
+          <div class="page">
+            <h3>Memory #1</h3>
+            <div class="polaroid"><img src="photo1.jpg" alt="Memory 1" /></div>
+            <p>That time we laughed so hard we cried — unforgettable.</p>
+          </div>
+          <!-- Memory 2 -->
+          <div class="page">
+            <h3>Memory #2</h3>
+            <div class="polaroid"><img src="photo2.jpg" alt="Memory 2" /></div>
+            <p>Sunset walks and long talks — best combo.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Birthday music -->
+    <audio id="birthdayMusic" src="happy-birthday.mp3"></audio>
+
+    <script>
+      const gift = document.getElementById("gift");
+      const msg = document.getElementById("msg");
+      const openBookBtn = document.getElementById("openBookBtn");
+      const confetti = document.getElementById("confetti");
+      const modal = document.getElementById("souvenirModal");
+      const closeModal = document.getElementById("closeModal");
+      const music = document.getElementById("birthdayMusic");
+
+      function makeConfetti() {
+        const colors = [
+          "#ffd166",
+          "#ff4d6d",
+          "#6c63ff",
+          "#64dfdf",
+          "#95d5b2",
+          "#f4a261",
+        ];
+        confetti.innerHTML = "";
+        for (let i = 0; i < 100; i++) {
+          const p = document.createElement("div");
+          p.className = "piece";
+          p.style.left = Math.random() * 100 + "vw";
+          p.style.top = -10 - Math.random() * 20 + "vh";
+          p.style.background =
+            colors[Math.floor(Math.random() * colors.length)];
+          p.style.animationDuration = 6 + Math.random() * 4 + "s";
+          p.style.transform = `translateY(0) rotate(${Math.random() * 360}deg)`;
+          confetti.appendChild(p);
+        }
+      }
+
+      gift.addEventListener("click", () => {
+        gift.classList.add("open");
+        msg.style.opacity = 1;
+        openBookBtn.style.display = "inline-flex";
+        makeConfetti();
+        music.play(); //  play birthday music
+        setTimeout(() => (confetti.style.opacity = 0), 5000);
+      });
+
+      openBookBtn.addEventListener("click", () => {
+        modal.classList.add("show");
+      });
+      closeModal.addEventListener("click", () => {
+        modal.classList.remove("show");
+      });
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) modal.classList.remove("show");
+      });
+    </script>
+  </body>
+</html>
